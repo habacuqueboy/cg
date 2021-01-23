@@ -8,6 +8,7 @@ const main = () => {
     const status = document.querySelector("#status")
     try {
         init(
+            500,500,
             [VertexShader,FragmentShader],
             [Triangulo,Quadrado],
             [ [-1.5, 1.0, -7.0] , [3.0, 0.0, 0.0] ]

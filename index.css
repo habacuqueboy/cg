@@ -16,11 +16,6 @@ body {
     position: fixed;
 }
 
-#canvas {
-    width: 500px;    
-    height: 500px;
-}
-
 main {
     display: flex;
     align-items: center;
