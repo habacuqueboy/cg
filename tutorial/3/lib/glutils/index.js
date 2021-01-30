@@ -49,16 +49,6 @@ const iniciarBuffers = (gl,locations,formasClasses) => {
         const state = gl.createVertexArray()
         gl.bindVertexArray(state)
 
-        console.log(formaObj.color)
-        // muda para o buffer de cor
-        const colorBuffer = gl.createBuffer()
-        gl.bindBuffer(gl.ARRAY_BUFFER,colorBuffer)
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(formaObj.color), gl.STATIC_DRAW);
-
-        // aplica o buffer de cor no estado
-        gl.enableVertexAttribArray(locations.aVertexColor);
-        gl.vertexAttribPointer(locations.aVertexColor,4,gl.FLOAT,false,0,0)
-
         // muda para o buffer de posicao
         const positionBuffer = gl.createBuffer()
         gl.bindBuffer(gl.ARRAY_BUFFER,positionBuffer)
@@ -68,6 +58,14 @@ const iniciarBuffers = (gl,locations,formasClasses) => {
         gl.enableVertexAttribArray(locations.aVertexPosition);
         gl.vertexAttribPointer(locations.aVertexPosition,formaObj.itemSize,gl.FLOAT,false,0,0)
 
+        // muda para o buffer de cor
+        const colorBuffer = gl.createBuffer()
+        gl.bindBuffer(gl.ARRAY_BUFFER,colorBuffer)
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(formaObj.color), gl.STATIC_DRAW);
+
+        // aplica o buffer de cor no estado
+        gl.enableVertexAttribArray(locations.aVertexColor);
+        gl.vertexAttribPointer(locations.aVertexColor,formaObj.itemSize,gl.FLOAT,false,0,0)
 
         return { state , ...formaObj }
     })
@@ -100,7 +98,7 @@ const translate = (matrix,trans) => {
     mat4.translate( matrix.model , matrix.model , matrix.translation )
 }
 
-const setUnif = (gl,locations,matrix) => {
+const setUnif = (gl,locations,matrix,color) => {
     gl.uniformMatrix4fv(locations.uProjectionMatrix,false,matrix.projection)
     gl.uniformMatrix4fv(locations.uModelMatrix,false,matrix.model)
     gl.uniformMatrix4fv(locations.uViewMatrix,false,matrix.view)
@@ -130,6 +128,12 @@ const carregaShader = (gl,shaderClass) => {
     return shader
 }
 
+const tick = (gl,locations,buffers,matrix,translations) => {
+    requestAnimationFrame(tick)
+    desenharCena(gl,locations,buffers,matrix,translations)
+    animar()
+}
+
 
 const run = (width,height,shadersClasses,formasClasses,translations) => {
     const gl = iniciarGL(width,height)
@@ -138,7 +142,6 @@ const run = (width,height,shadersClasses,formasClasses,translations) => {
     const buffers = iniciarBuffers(gl,locations,formasClasses)
     const matrix = initMatrix(gl)
     iniciarAmbiente(gl)
-    desenharCena(gl,locations,buffers,matrix,translations)
 }
 
 export default { run }
