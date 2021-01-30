@@ -1,2 +1,2 @@
-# cg1
-[https://habacuqueboy.github.io/cg1/]
+# cg
+[https://habacuqueboy.github.io/cg]
