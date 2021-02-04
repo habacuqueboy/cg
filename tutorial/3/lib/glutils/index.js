@@ -49,6 +49,15 @@ const iniciarBuffers = (gl,locations,formasClasses) => {
         const state = gl.createVertexArray()
         gl.bindVertexArray(state)
 
+        // muda para o buffer de cor
+        const colorBuffer = gl.createBuffer()
+        gl.bindBuffer(gl.ARRAY_BUFFER,colorBuffer)
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(formaObj.color), gl.STATIC_DRAW);
+
+        // aplica o buffer de cor no estado
+        gl.enableVertexAttribArray(locations.aVertexColor);
+        gl.vertexAttribPointer(locations.aVertexColor,4,gl.FLOAT,false,0,0)
+
         // muda para o buffer de posicao
         const positionBuffer = gl.createBuffer()
         gl.bindBuffer(gl.ARRAY_BUFFER,positionBuffer)
@@ -58,14 +67,6 @@ const iniciarBuffers = (gl,locations,formasClasses) => {
         gl.enableVertexAttribArray(locations.aVertexPosition);
         gl.vertexAttribPointer(locations.aVertexPosition,formaObj.itemSize,gl.FLOAT,false,0,0)
 
-        // muda para o buffer de cor
-        const colorBuffer = gl.createBuffer()
-        gl.bindBuffer(gl.ARRAY_BUFFER,colorBuffer)
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(formaObj.color), gl.STATIC_DRAW);
-
-        // aplica o buffer de cor no estado
-        gl.enableVertexAttribArray(locations.aVertexColor);
-        gl.vertexAttribPointer(locations.aVertexColor,formaObj.itemSize,gl.FLOAT,false,0,0)
 
         return { state , ...formaObj }
     })
@@ -78,40 +79,59 @@ const iniciarAmbiente = (gl) => {
 
 const initMatrix = (gl) => {
 
-    const model = mat4.create()
+    let model = mat4.create()
     const view = mat4.create()
     const projection = mat4.create()
 
-    const translation = vec3.create()
-
+    const pilha = []
     const [ , ,vW,vH] = gl.getParameter(gl.VIEWPORT)
 
-    mat4.perspective( projection , 45, vW/vH , 0.1, 100.0 ),
-    mat4.identity(model)
-    mat4.identity(view)
+    const reset = () => {
+        mat4.perspective( projection , 45, vW/vH , 0.1, 100.0 ),
+        mat4.identity(model)
+        mat4.identity(view)
+    }
 
-    return { model , view , projection , translation }
+    const push = () => pilha.push( mat4.clone(model) )
+    const pop = () => {
+        if( pilha.length == 0 ) { throw new Error('pop inválido') }
+        model = pilha.pop()
+    }
+
+    return { model , view , projection , reset , pop , push }
 }
 
 const translate = (matrix,trans) => {
-    vec3.set( matrix.translation , ...trans ) 
-    mat4.translate( matrix.model , matrix.model , matrix.translation )
+    mat4.translate( matrix.model , matrix.model , trans )
 }
 
-const setUnif = (gl,locations,matrix,color) => {
+const setUnif = (gl,locations,matrix) => {
     gl.uniformMatrix4fv(locations.uProjectionMatrix,false,matrix.projection)
     gl.uniformMatrix4fv(locations.uModelMatrix,false,matrix.model)
     gl.uniformMatrix4fv(locations.uViewMatrix,false,matrix.view)
 }
 
 const desenharCena = (gl,locations,buffers,matrix,translations) => {
+
     gl.clear(gl.COLOR_BUFFER_BIT)
-    buffers.forEach( (buf,i) => {
+    matrix.reset()
+
+    console.log(matrix.model)
+    const buf = buffers[0]
+    const i = 0
+
+    //buffers.forEach( (buf,i) => {
+    //
         gl.bindVertexArray(buf.state)
         translate(matrix,translations[i])
+
+        //matrix.push()
+    
         setUnif(gl,locations,matrix)
         gl.drawArrays(buf.tipo,0,buf.numItems)
-    })
+
+        //matrix.pop()
+    //})
 }
 
 
@@ -128,12 +148,6 @@ const carregaShader = (gl,shaderClass) => {
     return shader
 }
 
-const tick = (gl,locations,buffers,matrix,translations) => {
-    requestAnimationFrame(tick)
-    desenharCena(gl,locations,buffers,matrix,translations)
-    animar()
-}
-
 
 const run = (width,height,shadersClasses,formasClasses,translations) => {
     const gl = iniciarGL(width,height)
@@ -142,6 +156,8 @@ const run = (width,height,shadersClasses,formasClasses,translations) => {
     const buffers = iniciarBuffers(gl,locations,formasClasses)
     const matrix = initMatrix(gl)
     iniciarAmbiente(gl)
+    desenharCena(gl,locations,buffers,matrix,translations)
+    desenharCena(gl,locations,buffers,matrix,translations)
 }
 
 export default { run }
