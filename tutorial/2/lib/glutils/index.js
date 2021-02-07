@@ -44,32 +44,17 @@ const iniciarBuffers = (gl,locations,formasClasses) => {
     return formasClasses.map( formaClasse => {
 
         const formaObj = formaClasse(gl)
+        const buffer = gl.createBuffer()
 
-        // estado que vai ter os buffers
-        const state = gl.createVertexArray()
-        gl.bindVertexArray(state)
-
-        console.log(formaObj.color)
-        // muda para o buffer de cor
-        const colorBuffer = gl.createBuffer()
-        gl.bindBuffer(gl.ARRAY_BUFFER,colorBuffer)
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(formaObj.color), gl.STATIC_DRAW);
-
-        // aplica o buffer de cor no estado
-        gl.enableVertexAttribArray(locations.aVertexColor);
-        gl.vertexAttribPointer(locations.aVertexColor,4,gl.FLOAT,false,0,0)
-
-        // muda para o buffer de posicao
-        const positionBuffer = gl.createBuffer()
-        gl.bindBuffer(gl.ARRAY_BUFFER,positionBuffer)
+        gl.bindBuffer(gl.ARRAY_BUFFER,buffer)
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(formaObj.vertices), gl.STATIC_DRAW);
 
-        // aplica o buffer de posicao no estado
+        const vao = gl.createVertexArray()
+        gl.bindVertexArray(vao)
         gl.enableVertexAttribArray(locations.aVertexPosition);
         gl.vertexAttribPointer(locations.aVertexPosition,formaObj.itemSize,gl.FLOAT,false,0,0)
 
-
-        return { state , ...formaObj }
+        return { vao , tipo: formaObj.tipo , numItems : formaObj.numItems }
     })
 }
 
@@ -100,7 +85,7 @@ const translate = (matrix,trans) => {
     mat4.translate( matrix.model , matrix.model , matrix.translation )
 }
 
-const setUnif = (gl,locations,matrix) => {
+const setMatrixUniforms = (gl,locations,matrix) => {
     gl.uniformMatrix4fv(locations.uProjectionMatrix,false,matrix.projection)
     gl.uniformMatrix4fv(locations.uModelMatrix,false,matrix.model)
     gl.uniformMatrix4fv(locations.uViewMatrix,false,matrix.view)
@@ -109,9 +94,9 @@ const setUnif = (gl,locations,matrix) => {
 const desenharCena = (gl,locations,buffers,matrix,translations) => {
     gl.clear(gl.COLOR_BUFFER_BIT)
     buffers.forEach( (buf,i) => {
-        gl.bindVertexArray(buf.state)
         translate(matrix,translations[i])
-        setUnif(gl,locations,matrix)
+        setMatrixUniforms(gl,locations,matrix)
+        gl.bindVertexArray(buf.vao)
         gl.drawArrays(buf.tipo,0,buf.numItems)
     })
 }
@@ -131,7 +116,7 @@ const carregaShader = (gl,shaderClass) => {
 }
 
 
-const run = (width,height,shadersClasses,formasClasses,translations) => {
+const init = (width,height,shadersClasses,formasClasses,translations) => {
     const gl = iniciarGL(width,height)
     const programa = iniciarPrograma(gl,shadersClasses)
     const locations = iniciarLocations(gl,programa)
@@ -141,4 +126,4 @@ const run = (width,height,shadersClasses,formasClasses,translations) => {
     desenharCena(gl,locations,buffers,matrix,translations)
 }
 
-export default { run }
+export default init

@@ -49,7 +49,6 @@ const iniciarBuffers = (gl,locations,formasClasses) => {
         const state = gl.createVertexArray()
         gl.bindVertexArray(state)
 
-        console.log(formaObj.color)
         // muda para o buffer de cor
         const colorBuffer = gl.createBuffer()
         gl.bindBuffer(gl.ARRAY_BUFFER,colorBuffer)
@@ -57,7 +56,7 @@ const iniciarBuffers = (gl,locations,formasClasses) => {
 
         // aplica o buffer de cor no estado
         gl.enableVertexAttribArray(locations.aVertexColor);
-        gl.vertexAttribPointer(locations.aVertexColor,4,gl.FLOAT,false,0,0)
+        gl.vertexAttribPointer(locations.aVertexColor,formaObj.colorNumItems,gl.FLOAT,false,0,0)
 
         // muda para o buffer de posicao
         const positionBuffer = gl.createBuffer()
@@ -68,54 +67,111 @@ const iniciarBuffers = (gl,locations,formasClasses) => {
         gl.enableVertexAttribArray(locations.aVertexPosition);
         gl.vertexAttribPointer(locations.aVertexPosition,formaObj.itemSize,gl.FLOAT,false,0,0)
 
+        if( formaObj.index ) {
+            console.log(formaObj.index)
+            // muda para o buffer de indices
+            const indexBuffer = gl.createBuffer()
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,indexBuffer)
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(formaObj.index), gl.STATIC_DRAW);
+        }
+
 
         return { state , ...formaObj }
     })
 }
 
 const iniciarAmbiente = (gl) => {
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
-    gl.enable(gl.DEPTH_TEST);
+    gl.clearColor(0.0, 0.0, 0.0, 1.0)
+    gl.enable(gl.DEPTH_TEST)
+    gl.depthFunc(gl.LEQUAL)
 }
 
 const initMatrix = (gl) => {
 
-    const model = mat4.create()
+    let model = mat4.create()
     const view = mat4.create()
     const projection = mat4.create()
 
-    const translation = vec3.create()
 
+    const pilha = []
     const [ , ,vW,vH] = gl.getParameter(gl.VIEWPORT)
 
     mat4.perspective( projection , 45, vW/vH , 0.1, 100.0 ),
     mat4.identity(model)
     mat4.identity(view)
 
-    return { model , view , projection , translation }
+    const push = () => pilha.push( mat4.clone(model) )
+    const pop = () => {
+        if( pilha.length == 0 ) { throw new Error('pop inválido') }
+        model = pilha.pop()
+    }
+
+    return { model , view , projection , pop , push }
 }
 
-const translate = (matrix,trans) => {
-    vec3.set( matrix.translation , ...trans ) 
-    mat4.translate( matrix.model , matrix.model , matrix.translation )
+const translate = (model,trans) => {
+    mat4.translate( model , model , trans )
 }
 
-const setUnif = (gl,locations,matrix) => {
-    gl.uniformMatrix4fv(locations.uProjectionMatrix,false,matrix.projection)
-    gl.uniformMatrix4fv(locations.uModelMatrix,false,matrix.model)
-    gl.uniformMatrix4fv(locations.uViewMatrix,false,matrix.view)
+const rotate = (model,degree,axis) => {
+    mat4.rotate( model , model , degree * ( Math.PI / 180 ) , axis )
 }
 
-const desenharCena = (gl,locations,buffers,matrix,translations) => {
+const setUnif = (gl,locations,p,m,v) => {
+    gl.uniformMatrix4fv(locations.uProjectionMatrix,false,p)
+    gl.uniformMatrix4fv(locations.uModelMatrix,false,m)
+    gl.uniformMatrix4fv(locations.uViewMatrix,false,v)
+}
+
+const desenharCena = (gl,locations,buffers) => {
+
+    gl.clearDepth(1.0)
     gl.clear(gl.COLOR_BUFFER_BIT)
-    buffers.forEach( (buf,i) => {
+
+    let model = mat4.create()
+    const view = mat4.create()
+    const projection = mat4.create()
+
+    const [ , ,vW,vH] = gl.getParameter(gl.VIEWPORT)
+    mat4.perspective( projection , 45, vW/vH , 0.1, 100.0 ),
+    mat4.identity(model)
+    mat4.identity(view)
+
+    const pilha = []
+
+    buffers.forEach( (buf) => {
+    
         gl.bindVertexArray(buf.state)
-        translate(matrix,translations[i])
-        setUnif(gl,locations,matrix)
-        gl.drawArrays(buf.tipo,0,buf.numItems)
+
+        translate(model,buf.translate)
+        pilha.push( mat4.clone(model) )
+
+        rotate(model,buf.rot,buf.rotAxis)
+    
+        setUnif(gl,locations,projection,model,view)
+
+        if( buf.index ) { gl.drawElements( buf.tipo, buf.indexNumItems , gl.UNSIGNED_SHORT , 0 ) } 
+        else { gl.drawArrays(buf.tipo,0,buf.numItems) }
+
+        model = pilha.pop()
+
     })
 }
 
+let last = 0
+const animateBuilder = (gl,locations,buffers) => {
+    return () => {
+        desenharCena(gl,locations,buffers)
+        const now = Date.now()
+        if ( last != 0 ) { 
+            const delta = now - last
+            buffers.forEach( (buf) => {
+                buf.rot +=  ( ( buf.rotStep * delta ) / 1000 ) % 360
+            })
+        }
+        last = now
+    }
+}
 
 const carregaShader = (gl,shaderClass) => {
     const shaderObj = shaderClass(gl)
@@ -132,13 +188,21 @@ const carregaShader = (gl,shaderClass) => {
 
 
 const run = (width,height,shadersClasses,formasClasses,translations) => {
+
     const gl = iniciarGL(width,height)
     const programa = iniciarPrograma(gl,shadersClasses)
     const locations = iniciarLocations(gl,programa)
     const buffers = iniciarBuffers(gl,locations,formasClasses)
-    const matrix = initMatrix(gl)
+    const animate = animateBuilder(gl,locations,buffers)
+
+    const tick = () => {
+        requestAnimationFrame(tick)
+        animate()
+    }
+
     iniciarAmbiente(gl)
-    desenharCena(gl,locations,buffers,matrix,translations)
+    tick()
+
 }
 
 export default { run }

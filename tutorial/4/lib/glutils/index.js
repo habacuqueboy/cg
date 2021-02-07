@@ -56,7 +56,7 @@ const iniciarBuffers = (gl,locations,formasClasses) => {
 
         // aplica o buffer de cor no estado
         gl.enableVertexAttribArray(locations.aVertexColor);
-        gl.vertexAttribPointer(locations.aVertexColor,formaObj.colorNumItems,gl.FLOAT,false,0,0)
+        gl.vertexAttribPointer(locations.aVertexColor,4,gl.FLOAT,false,0,0)
 
         // muda para o buffer de posicao
         const positionBuffer = gl.createBuffer()

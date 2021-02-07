@@ -1,17 +1,12 @@
-import { FormaBase } from './utils.js'
-
-const Triangulo = (cor) => {
-
-    const build = (gl) => FormaBase(
-          [
-            0.0, 1.0, 0.0,
-           -1.0,-1.0, 0.0,
-            1.0,-1.0, 0.0,
-          ],
-          cor,3,3,gl.TRIANGLES
-    )
-
-    return build
-}
+const Triangulo = (gl) => ({
+    vertices: [
+	    0.0, 1.0, 0.0,
+	    1.0,-1.0, 0.0,
+       -1.0,-1.0, 0.0,
+      ],
+    itemSize: 3,
+    numItems: 3,
+    tipo: gl.TRIANGLES,
+})
 
 export default Triangulo

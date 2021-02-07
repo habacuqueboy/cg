@@ -7,28 +7,14 @@ const main = () => {
     try {
         glutils.run( 500,500, [ VertexShader, FragmentShader ],
             [ 
-              
-              Triangulo(
-                [
+              Triangulo([
                    1.0, 0.0, 0.0, 1.0,
                    0.0, 1.0, 0.0, 1.0,
                    0.0, 0.0, 1.0, 1.0,
-                ],
-                [-1.5,1.0,-7.0],
-                0, 
-                [0,1,0],
-                90,
-              ), 
-
-              Quadrado(
-                  [0.5, 0.5, 1.0], // cor
-                  [3.0, 0.0, 0.0], // translacao
-                  0, // initial rotation
-                  [1,0,0], // rotation axis
-                  75, // rot step
-              ) 
-
+              ]), 
+              Quadrado([0.5, 0.5, 1.0]) 
             ],
+            [ [-1.5, 1.0, -7.0] , [3.0, 0.0, 0.0] ]
         )
         status.remove()
     } catch(e) {

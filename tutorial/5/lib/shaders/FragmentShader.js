@@ -7,11 +7,11 @@ const FragmentShader = (gl) => ({
     precision mediump float;
 
     in vec4 vColor; // recebe valor do vertex shader
+
     out vec4 fragmentColor;
 
     void main() {
-        // fragmentColor = vColor;
-           fragmentColor = vec4(1.0, 1.0, 1.0, 1.0);
+        fragmentColor = vColor;
     }`
 })
 
