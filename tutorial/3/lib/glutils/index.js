@@ -79,30 +79,42 @@ const iniciarAmbiente = (gl) => {
 
 const initMatrix = (gl) => {
 
-    let model = mat4.create()
-    const view = mat4.create()
-    const projection = mat4.create()
+    let model
+    let view
+    let projection
 
     const pilha = []
     const [ , ,vW,vH] = gl.getParameter(gl.VIEWPORT)
 
     const reset = () => {
+
+        model = mat4.create()
+        view = mat4.create()
+        projection = mat4.create()
+
         mat4.perspective( projection , 45, vW/vH , 0.1, 100.0 ),
         mat4.identity(model)
         mat4.identity(view)
+
     }
 
     const push = () => pilha.push( mat4.clone(model) )
     const pop = () => {
         if( pilha.length == 0 ) { throw new Error('pop inválido') }
         model = pilha.pop()
+        console.log(model)
     }
 
+    reset()
     return { model , view , projection , reset , pop , push }
 }
 
 const translate = (matrix,trans) => {
     mat4.translate( matrix.model , matrix.model , trans )
+}
+
+const rotate = (matrix,degree,axis) => {
+    mat4.rotate( matrix.model , matrix.model , degree * ( Math.PI / 180 ) , axis )
 }
 
 const setUnif = (gl,locations,matrix) => {
@@ -114,24 +126,23 @@ const setUnif = (gl,locations,matrix) => {
 const desenharCena = (gl,locations,buffers,matrix,translations) => {
 
     gl.clear(gl.COLOR_BUFFER_BIT)
+    gl.depthFunc(gl.LEQUAL) // ???
     matrix.reset()
 
-    console.log(matrix.model)
-    const buf = buffers[0]
-    const i = 0
-
-    //buffers.forEach( (buf,i) => {
-    //
+    buffers.forEach( (buf) => {
+    
         gl.bindVertexArray(buf.state)
-        translate(matrix,translations[i])
 
-        //matrix.push()
+        translate(matrix,buf.translate)
+
+        matrix.push()
+        rotate(matrix,buf.rot,buf.rotAxis)
     
         setUnif(gl,locations,matrix)
         gl.drawArrays(buf.tipo,0,buf.numItems)
 
-        //matrix.pop()
-    //})
+        matrix.pop()
+    })
 }
 
 

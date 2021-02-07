@@ -1,6 +1,6 @@
 import { FormaBase } from './utils.js'
 
-const Quadrado = (cor) => {
+const Quadrado = (cor,translate,rot,rotAxis) => {
 
     const build = (gl) => FormaBase(
           [
@@ -9,7 +9,7 @@ const Quadrado = (cor) => {
             1.0,-1.0, 0.0,
            -1.0,-1.0, 0.0
           ],
-          cor,3,4,gl.TRIANGLE_STRIP
+          cor,3,4,gl.TRIANGLE_STRIP,translate,rot,rotAxis
     )
 
     return build
