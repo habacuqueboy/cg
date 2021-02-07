@@ -41,7 +41,11 @@ const main = () => {
                     [1.0, 0.5, 0.5, 1.0],     // Base
                     [1.0, 0.0, 1.0, 1.0],     // Direita
                     [0.0, 0.0, 1.0, 1.0],     // Esquerda
-                  ]
+                  ],
+                  [3.0, 0.0, 0.0], // translacao
+                  0, // initial rotation
+                  [1,1,1], // rotation axis
+                  75, // rotation step
               ),
 
 

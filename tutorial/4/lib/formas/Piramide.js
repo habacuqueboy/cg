@@ -27,4 +27,4 @@ const Piramide = (cor,translate,rot,rotAxis,rotStep) => {
     return build
 }
 
-export default Triangulo
+export default Piramide

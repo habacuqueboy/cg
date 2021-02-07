@@ -47,4 +47,4 @@ const Cubo = (cor,translate,rot,rotAxis,rotStep) => {
     return build
 }
 
-export default Quadrado
+export default Cubo
