@@ -100,18 +100,18 @@ const initMatrix = (gl) => {
     return { model , view , projection , pop , push }
 }
 
-const translate = (matrix,trans) => {
-    mat4.translate( matrix.model , matrix.model , trans )
+const translate = (model,trans) => {
+    mat4.translate( model , model , trans )
 }
 
-const rotate = (matrix,degree,axis) => {
-    mat4.rotate( matrix.model , matrix.model , degree * ( Math.PI / 180 ) , axis )
+const rotate = (model,degree,axis) => {
+    mat4.rotate( model , model , degree * ( Math.PI / 180 ) , axis )
 }
 
-const setUnif = (gl,locations,matrix) => {
-    gl.uniformMatrix4fv(locations.uProjectionMatrix,false,matrix.projection)
-    gl.uniformMatrix4fv(locations.uModelMatrix,false,matrix.model)
-    gl.uniformMatrix4fv(locations.uViewMatrix,false,matrix.view)
+const setUnif = (gl,locations,p,m,v) => {
+    gl.uniformMatrix4fv(locations.uProjectionMatrix,false,p)
+    gl.uniformMatrix4fv(locations.uModelMatrix,false,m)
+    gl.uniformMatrix4fv(locations.uViewMatrix,false,v)
 }
 
 const desenharCena = (gl,locations,buffers) => {
@@ -119,21 +119,33 @@ const desenharCena = (gl,locations,buffers) => {
     gl.clear(gl.COLOR_BUFFER_BIT)
     gl.depthFunc(gl.LEQUAL) // ???
 
-    const matrix = initMatrix(gl)
+    let model = mat4.create()
+    const view = mat4.create()
+    const projection = mat4.create()
+
+    const [ , ,vW,vH] = gl.getParameter(gl.VIEWPORT)
+    mat4.perspective( projection , 45, vW/vH , 0.1, 100.0 ),
+    mat4.identity(model)
+    mat4.identity(view)
+
+    const pilha = []
+
+    //const matrix = initMatrix(gl)
 
     buffers.forEach( (buf) => {
     
         gl.bindVertexArray(buf.state)
 
-        translate(matrix,buf.translate)
+        translate(model,buf.translate)
+        pilha.push( mat4.clone(model) )
 
-        matrix.push()
-        rotate(matrix,buf.rot,buf.rotAxis)
+        rotate(model,buf.rot,buf.rotAxis)
     
-        setUnif(gl,locations,matrix)
+        setUnif(gl,locations,projection,model,view)
         gl.drawArrays(buf.tipo,0,buf.numItems)
 
-        matrix.pop()
+        model = pilha.pop()
+
     })
 }
 
