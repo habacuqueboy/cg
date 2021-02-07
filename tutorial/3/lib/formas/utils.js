@@ -7,7 +7,7 @@ const genColor = (color,itemSize,numItems) => {
     else { throw new Error('invalid color \n' + color ) }
 }
 
-const FormaBase = (vertices,color,itemSize,numItems,tipo, translate = [0,0,0] , rot = 0 , rotAxis = [0,1,0] ) => ({
+const FormaBase = (vertices,color,itemSize,numItems,tipo, translate = [0,0,0] , rot = 0 , rotAxis = [0,1,0] , rotStep = 0 ) => ({
     vertices,
     color : genColor(color,itemSize,numItems),
     itemSize,
@@ -16,6 +16,7 @@ const FormaBase = (vertices,color,itemSize,numItems,tipo, translate = [0,0,0] , 
     translate,
     rot,
     rotAxis,
+    rotStep,
 })
 
 export { FormaBase }

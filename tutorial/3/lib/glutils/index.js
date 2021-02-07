@@ -79,34 +79,25 @@ const iniciarAmbiente = (gl) => {
 
 const initMatrix = (gl) => {
 
-    let model
-    let view
-    let projection
+    let model = mat4.create()
+    const view = mat4.create()
+    const projection = mat4.create()
+
 
     const pilha = []
     const [ , ,vW,vH] = gl.getParameter(gl.VIEWPORT)
 
-    const reset = () => {
-
-        model = mat4.create()
-        view = mat4.create()
-        projection = mat4.create()
-
-        mat4.perspective( projection , 45, vW/vH , 0.1, 100.0 ),
-        mat4.identity(model)
-        mat4.identity(view)
-
-    }
+    mat4.perspective( projection , 45, vW/vH , 0.1, 100.0 ),
+    mat4.identity(model)
+    mat4.identity(view)
 
     const push = () => pilha.push( mat4.clone(model) )
     const pop = () => {
         if( pilha.length == 0 ) { throw new Error('pop inválido') }
         model = pilha.pop()
-        console.log(model)
     }
 
-    reset()
-    return { model , view , projection , reset , pop , push }
+    return { model , view , projection , pop , push }
 }
 
 const translate = (matrix,trans) => {
@@ -123,11 +114,10 @@ const setUnif = (gl,locations,matrix) => {
     gl.uniformMatrix4fv(locations.uViewMatrix,false,matrix.view)
 }
 
-const desenharCena = (gl,locations,buffers,matrix,translations) => {
+const desenharCena = (gl,locations,buffers) => {
 
     gl.clear(gl.COLOR_BUFFER_BIT)
     gl.depthFunc(gl.LEQUAL) // ???
-    matrix.reset()
 
     buffers.forEach( (buf) => {
     
@@ -145,6 +135,20 @@ const desenharCena = (gl,locations,buffers,matrix,translations) => {
     })
 }
 
+let last = 0
+const animateBuilder = (gl,locations,buffers) => {
+    return () => {
+        desenharCena(gl,locations,buffers)
+        const now = Date.now()
+        if ( last != 0 ) { 
+            const delta = now - last
+            buffers.forEach( (buf) => {
+                buf.rot +=  ( ( buf.rotStep * delta ) / 1000 ) % 360
+            })
+        }
+        last = now
+    }
+}
 
 const carregaShader = (gl,shaderClass) => {
     const shaderObj = shaderClass(gl)
@@ -161,14 +165,21 @@ const carregaShader = (gl,shaderClass) => {
 
 
 const run = (width,height,shadersClasses,formasClasses,translations) => {
+
     const gl = iniciarGL(width,height)
     const programa = iniciarPrograma(gl,shadersClasses)
     const locations = iniciarLocations(gl,programa)
     const buffers = iniciarBuffers(gl,locations,formasClasses)
-    const matrix = initMatrix(gl)
+    const animate = animateBuilder(gl,locations,buffers)
+
+    const tick = () => {
+        requestAnimationFrame(tick)
+        animate()
+    }
+
     iniciarAmbiente(gl)
-    desenharCena(gl,locations,buffers,matrix,translations)
-    desenharCena(gl,locations,buffers,matrix,translations)
+    tick()
+
 }
 
 export default { run }

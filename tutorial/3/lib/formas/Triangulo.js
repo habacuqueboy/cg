@@ -1,6 +1,6 @@
 import { FormaBase } from './utils.js'
 
-const Triangulo = (cor,translate,rot,rotAxis) => {
+const Triangulo = (cor,translate,rot,rotAxis,rotStep) => {
 
     const build = (gl) => FormaBase(
           [
@@ -8,7 +8,7 @@ const Triangulo = (cor,translate,rot,rotAxis) => {
            -1.0,-1.0, 0.0,
             1.0,-1.0, 0.0,
           ],
-          cor,3,3,gl.TRIANGLES,translate,rot,rotAxis
+          cor,3,3,gl.TRIANGLES,translate,rot,rotAxis,rotStep
     )
 
     return build
