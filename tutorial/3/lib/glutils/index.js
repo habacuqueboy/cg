@@ -119,6 +119,8 @@ const desenharCena = (gl,locations,buffers) => {
     gl.clear(gl.COLOR_BUFFER_BIT)
     gl.depthFunc(gl.LEQUAL) // ???
 
+    const matrix = initMatrix(gl)
+
     buffers.forEach( (buf) => {
     
         gl.bindVertexArray(buf.state)
