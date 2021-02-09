@@ -49,14 +49,40 @@ const iniciarBuffers = (gl,locations,formasClasses) => {
         const state = gl.createVertexArray()
         gl.bindVertexArray(state)
 
-        // muda para o buffer de cor
-        const colorBuffer = gl.createBuffer()
-        gl.bindBuffer(gl.ARRAY_BUFFER,colorBuffer)
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(formaObj.color), gl.STATIC_DRAW);
 
-        // aplica o buffer de cor no estado
-        gl.enableVertexAttribArray(locations.aVertexColor);
-        gl.vertexAttribPointer(locations.aVertexColor,formaObj.colorNumItems,gl.FLOAT,false,0,0)
+        if( formaObj.texCord ) {
+            // muda para o buffer de texturas
+            const texCordBuffer = gl.createBuffer()
+            gl.bindBuffer(gl.ARRAY_BUFFER,texCordBuffer)
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(formaObj.texCord) , gl.STATIC_DRAW )
+            // aplica o buffer de texturas no estado
+            gl.enableVertexAttribArray(locations.aTexCord);
+            gl.vertexAttribPointer(locations.aTexCord,formaObj.texCordItemSize,gl.FLOAT,false,0,0)
+
+            //cria textura
+            const texture = gl.createTexture()
+            gl.activeTexture( gl.TEXTURE0 + 0 )
+            gl.bindTexture(gl.TEXTURE_2D,texture)
+            const image = new Image()
+            image.src = formaObj.texSrc
+            image.onload = () => {
+                 gl.bindTexture(gl.TEXTURE_2D, texture)
+                 gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
+                 gl.generateMipmap(gl.TEXTURE_2D)
+            }
+
+
+        } else if( formaObj.color ) {
+
+            // muda para o buffer de cor
+            const colorBuffer = gl.createBuffer()
+            gl.bindBuffer(gl.ARRAY_BUFFER,colorBuffer)
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(formaObj.color), gl.STATIC_DRAW);
+            // aplica o buffer de cor no estado
+            gl.enableVertexAttribArray(locations.aVertexColor);
+            gl.vertexAttribPointer(locations.aVertexColor,formaObj.colorNumItems,gl.FLOAT,false,0,0)
+
+    }
 
         // muda para o buffer de posicao
         const positionBuffer = gl.createBuffer()
@@ -71,8 +97,9 @@ const iniciarBuffers = (gl,locations,formasClasses) => {
             // muda para o buffer de indices
             const indexBuffer = gl.createBuffer()
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,indexBuffer)
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(formaObj.index), gl.STATIC_DRAW);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(formaObj.index), gl.STATIC_DRAW)
         }
+
 
 
         return { state , ...formaObj }
@@ -185,23 +212,6 @@ const carregaShader = (gl,shaderClass) => {
     return shader
 }
 
-const tratarTextura = (gl,textura,imagem) => {
-    gl.bindTexture(gl.TEXTURE_2D, textura);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textura.image);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.bindTexture(gl.TEXTURE_2D, null);
-}
-
-const iniciarTextura = (gl,src) => {
-    const textura = gl.createTexture()
-    const imagem = new Image()
-    imagem.src = src
-    imagem.onload = tratarTextura(gl,textura,imagem)
-}
-
-
 const run = (width,height,shadersClasses,formasClasses,translations) => {
 
     const gl = iniciarGL(width,height)
@@ -216,7 +226,6 @@ const run = (width,height,shadersClasses,formasClasses,translations) => {
     }
 
     iniciarAmbiente(gl)
-    //iniciarTextura(gl)
 
     tick()
 

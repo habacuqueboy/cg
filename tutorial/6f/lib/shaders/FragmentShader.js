@@ -7,11 +7,15 @@ const FragmentShader = (gl) => ({
     precision mediump float;
 
     in vec4 vColor; // recebe valor do vertex shader
+    in vec2 vTexCord;
+
+    uniform sampler2D uTex;
 
     out vec4 fragmentColor;
 
     void main() {
-        fragmentColor = vColor;
+        //fragmentColor = texture(uTex,vTexCord) * vColor;
+        fragmentColor = texture(uTex,vTexCord);
     }`
 })
 
