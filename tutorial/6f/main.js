@@ -8,11 +8,11 @@ const main = () => {
         glutils.run( 500,500, [ VertexShader, FragmentShader ],
             [ 
               CuboTextura(
-                  [3.0, 0.0, 0.0], // translacao
+                  [0.0, 0.0, -5.0], // translacao
                   0, // initial rotation
                   [1,1,1], // rotation axis
                   75, // rotation step
-                  './assets/crate.jpg', // texture src
+                  './assets/predio.jpg', // texture src
               ),
 
 
