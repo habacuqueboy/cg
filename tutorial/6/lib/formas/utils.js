@@ -11,7 +11,7 @@ const genColor = (color,itemSize,numItems) => {
     }
 }
 
-const FormaBase = (vertices,color,colorNumItems,itemSize,numItems,tipo, translate = [0,0,0] , rot = 0 , rotAxis = [0,1,0] , rotStep = 0 , index , indexItemSize, indexNumItems , texCord , texCordItemSize ,texCordNumItems , texSrc ) => ({
+const FormaBase = (vertices,color,colorNumItems,itemSize,numItems,tipo, translate = [0,0,0] , rot = [0,0,0] , rotStep = [0,0,0] , index , indexItemSize, indexNumItems , texCord , texCordItemSize ,texCordNumItems , texSrc ) => ({
     vertices,
     color : color ? genColor(color,itemSize,numItems) : null,
     colorNumItems: numItems ?? null,
@@ -20,7 +20,6 @@ const FormaBase = (vertices,color,colorNumItems,itemSize,numItems,tipo, translat
     tipo,
     translate,
     rot,
-    rotAxis,
     rotStep,
     index,
     indexItemSize,

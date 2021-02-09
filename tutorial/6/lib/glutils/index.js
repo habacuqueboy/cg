@@ -139,8 +139,10 @@ const translate = (model,trans) => {
     mat4.translate( model , model , trans )
 }
 
-const rotate = (model,degree,axis) => {
-    mat4.rotate( model , model , degree * ( Math.PI / 180 ) , axis )
+const rotate = (model,rot,axis) => {
+    mat4.rotate( model , model , rot[0] * ( Math.PI / 180 ) , [1,0,0] )
+    mat4.rotate( model , model , rot[1] * ( Math.PI / 180 ) , [0,1,0] )
+    mat4.rotate( model , model , rot[2] * ( Math.PI / 180 ) , [0,0,1] )
 }
 
 const setUnif = (gl,locations,p,m,v) => {
@@ -172,7 +174,7 @@ const desenharCena = (gl,locations,buffers) => {
         translate(model,buf.translate)
         pilha.push( mat4.clone(model) )
 
-        rotate(model,buf.rot,buf.rotAxis)
+        rotate(model,buf.rot)
     
         setUnif(gl,locations,projection,model,view)
 
@@ -192,7 +194,9 @@ const animateBuilder = (gl,locations,buffers) => {
         if ( last != 0 ) { 
             const delta = now - last
             buffers.forEach( (buf) => {
-                buf.rot +=  ( ( buf.rotStep * delta ) / 1000 ) % 360
+                buf.rot[0] +=  ( ( buf.rotStep[0] * delta ) / 1000 ) % 360
+                buf.rot[1] +=  ( ( buf.rotStep[1] * delta ) / 1000 ) % 360
+                buf.rot[2] +=  ( ( buf.rotStep[2] * delta ) / 1000 ) % 360
             })
         }
         last = now

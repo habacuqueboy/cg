@@ -1,6 +1,6 @@
 import { FormaBase } from './utils.js'
 
-const Piramide = (cor,translate,rot,rotAxis,rotStep) => {
+const Piramide = (cor,translate,rot,rotStep) => {
 
     const build = (gl) => FormaBase(
           [
@@ -21,7 +21,7 @@ const Piramide = (cor,translate,rot,rotAxis,rotStep) => {
              -1.0, -1.0, -1.0,
              -1.0, -1.0,  1.0
           ],
-          cor,4,3,12,gl.TRIANGLES,translate,rot,rotAxis,rotStep
+          cor,4,3,12,gl.TRIANGLES,translate,rot,rotStep
     )
 
     return build

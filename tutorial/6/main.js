@@ -9,9 +9,8 @@ const main = () => {
             [ 
               CuboTextura(
                   [0.0, 0.0, -5.0], // translacao
-                  0, // initial rotation
-                  [1,1,1], // rotation axis
-                  75, // rotation step
+                  [0,0,0], // initial rotation x y z
+                  [90,75,50], // rotation step
                   './assets/predio.jpg', // texture src
               ),
 

@@ -1,6 +1,6 @@
 import { FormaBase } from './utils.js'
 
-const Cubo = (cor,translate,rot,rotAxis,rotStep) => {
+const Cubo = (cor,translate,rot,rotStep) => {
 
     const build = (gl) => FormaBase(
           [
@@ -40,7 +40,7 @@ const Cubo = (cor,translate,rot,rotAxis,rotStep) => {
               -1.0,  1.0,  1.0,
               -1.0,  1.0, -1.0,
 
-          ],cor,4,3,24,gl.TRIANGLES,translate,rot,rotAxis,rotStep,
+          ],cor,4,3,24,gl.TRIANGLES,translate,rot,rotStep,
           [
             0, 1, 2,      0, 2, 3,    // Frente
             4, 5, 6,      4, 6, 7,    // Trás
