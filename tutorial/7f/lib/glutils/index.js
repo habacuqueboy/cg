@@ -1,5 +1,10 @@
 import { mat4 , vec3 } from '../../ext/gl-matrix/index.js'
 
+let xVel = 0
+let yVel = 0
+let z = -5.0
+let filtro = 0
+
 const iniciarGL = (width,height) => {
     const canvas = document.querySelector("#canvas")  
     canvas.width = width
@@ -60,15 +65,29 @@ const iniciarBuffers = (gl,locations,formasClasses) => {
             gl.vertexAttribPointer(locations.aTexCord,formaObj.texCordItemSize,gl.FLOAT,false,0,0)
 
             //cria textura
-            const texture = gl.createTexture()
-            gl.activeTexture( gl.TEXTURE0 + 0 )
-            gl.bindTexture(gl.TEXTURE_2D,texture)
+            const texture = Array.from( new Array(3) , () => gl.createTexture() )
             const image = new Image()
             image.src = formaObj.texSrc
+
             image.onload = () => {
-                 gl.bindTexture(gl.TEXTURE_2D, texture)
-                 gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
-                 gl.generateMipmap(gl.TEXTURE_2D)
+
+                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)
+                gl.bindTexture(gl.TEXTURE_2D, texture[0])
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+
+                gl.bindTexture(gl.TEXTURE_2D, texture[1])
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE,image)
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+
+                gl.bindTexture(gl.TEXTURE_2D, texture[2])
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE,image)
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST)
+                gl.generateMipmap(gl.TEXTURE_2D)
+
             }
 
 
@@ -135,14 +154,13 @@ const initMatrix = (gl) => {
     return { model , view , projection , pop , push }
 }
 
-const translate = (model,trans) => {
-    mat4.translate( model , model , trans )
+const translate = (model) => {
+    mat4.translate( model , model , [0,0,z] )
 }
 
 const rotate = (model,rot,axis) => {
     mat4.rotate( model , model , rot[0] * ( Math.PI / 180 ) , [1,0,0] )
     mat4.rotate( model , model , rot[1] * ( Math.PI / 180 ) , [0,1,0] )
-    mat4.rotate( model , model , rot[2] * ( Math.PI / 180 ) , [0,0,1] )
 }
 
 const setUnif = (gl,locations,p,m,v) => {
@@ -194,9 +212,8 @@ const animateBuilder = (gl,locations,buffers) => {
         if ( last != 0 ) { 
             const delta = now - last
             buffers.forEach( (buf) => {
-                buf.rot[0] +=  ( ( buf.rotStep[0] * delta ) / 1000 ) % 360
-                buf.rot[1] +=  ( ( buf.rotStep[1] * delta ) / 1000 ) % 360
-                buf.rot[2] +=  ( ( buf.rotStep[2] * delta ) / 1000 ) % 360
+                buf.rot[0] +=  ( ( xVel * delta ) / 1000 ) % 360
+                buf.rot[1] +=  ( ( yVel * delta ) / 1000 ) % 360
             })
         }
         last = now
@@ -216,6 +233,43 @@ const carregaShader = (gl,shaderClass) => {
     return shader
 }
 
+const teclasPressionadas = {}
+
+const down = (e) => {
+  teclasPressionadas[e.keyCode] = true;
+  if (String.fromCharCode(e.keyCode) == "F") {
+    filtro = (filtro+1) % 3;
+  }
+}
+const up = (e) => teclasPressionadas[e.keyCode] = false
+
+const tratarTeclado = () => {
+  if (teclasPressionadas[33]) {
+    // Page Up
+    z -= 0.05;
+  }
+  if (teclasPressionadas[34]) {
+    // Page Down
+    z += 0.05;
+  }
+  if (teclasPressionadas[37]) {
+    // Esquerda
+    yVel -= 1;
+  }
+  if (teclasPressionadas[39]) {
+    // Direita
+    yVel += 1;
+  }
+  if (teclasPressionadas[38]) {
+    // Cima
+    xVel -= 1;
+  }
+  if (teclasPressionadas[40]) {
+    // Baixo
+    xVel += 1;
+  }
+}
+
 const run = (width,height,shadersClasses,formasClasses,translations) => {
 
     const gl = iniciarGL(width,height)
@@ -226,10 +280,13 @@ const run = (width,height,shadersClasses,formasClasses,translations) => {
 
     const tick = () => {
         requestAnimationFrame(tick)
+        tratarTeclado()
         animate()
     }
 
     iniciarAmbiente(gl)
+    document.onkeydown = down
+    document.onkeyup = up
 
     tick()
 

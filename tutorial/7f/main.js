@@ -11,7 +11,7 @@ const main = () => {
                   [0.0, 0.0, -5.0], // translacao
                   [0,0,0], // initial rotation x y z
                   [90,75,50], // rotation step
-                  './assets/predio.jpg', // texture src
+                  './assets/caixa.gif', // texture src
               ),
 
 
