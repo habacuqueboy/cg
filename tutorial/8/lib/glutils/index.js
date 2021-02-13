@@ -1,4 +1,4 @@
-import { mat4 , vec3 } from '../../ext/gl-matrix/index.js'
+import { mat3 , mat4 , vec3 } from '../../ext/gl-matrix/index.js'
 
 let xVel = 0
 let yVel = 0
@@ -164,6 +164,33 @@ const rotate = (model,rot,axis) => {
 }
 
 const setUnif = (gl,locations,p,m,v) => {
+    if( document.getElementById("luz").checked ) {
+
+        gl.uniform1i(locations.uUsarLuz,true)
+        
+        gl.uniform3f(
+            locations.uCorAmbiente,
+            parseFloat(document.getElementById("ar").value),
+            parseFloat(document.getElementById("ag").value),
+            parseFloat(document.getElementById("ab").value)
+        )
+        
+        const direcaoLuz = [
+             parseFloat(document.getElementById("dx").value),
+             parseFloat(document.getElementById("dy").value),
+             parseFloat(document.getElementById("dz").value)
+        ]
+
+        const direcaoNormalizada = vec3.create();
+        vec3.normalize(direcaoLuz, direcaoNormalizada);
+        vec3.scale(direcaoNormalizada, -1);
+        gl.uniform3fv(locations.uDirecaoLuz, direcaoNormalizada);
+
+        const matrizNormal = mat3.create();
+        mat3.normalFromMat4(m, matrizNormal);
+        mat3.transpose(matrizNormal, matrizNormal);
+        gl.uniformMatrix3fv(locations.uNormalMatrix, false, matrizNormal);
+    } else { gl.uniform1i(locations.uUsarLuz,false) }
     gl.uniformMatrix4fv(locations.uProjectionMatrix,false,p)
     gl.uniformMatrix4fv(locations.uModelMatrix,false,m)
     gl.uniformMatrix4fv(locations.uViewMatrix,false,v)
