@@ -54,6 +54,7 @@ const iniciarBuffers = (gl,locations,formasClasses) => {
         const state = gl.createVertexArray()
         gl.bindVertexArray(state)
 
+        const texture = Array.from( new Array(3) , () => gl.createTexture() )
 
         if( formaObj.texCord ) {
             // muda para o buffer de texturas
@@ -65,7 +66,6 @@ const iniciarBuffers = (gl,locations,formasClasses) => {
             gl.vertexAttribPointer(locations.aTexCord,formaObj.texCordItemSize,gl.FLOAT,false,0,0)
 
             //cria textura
-            const texture = Array.from( new Array(3) , () => gl.createTexture() )
             const image = new Image()
             image.src = formaObj.texSrc
 
@@ -121,7 +121,7 @@ const iniciarBuffers = (gl,locations,formasClasses) => {
 
 
 
-        return { state , ...formaObj }
+        return { state , texture , ...formaObj }
     })
 }
 
@@ -188,6 +188,7 @@ const desenharCena = (gl,locations,buffers) => {
     buffers.forEach( (buf) => {
     
         gl.bindVertexArray(buf.state)
+        gl.bindTexture(gl.TEXTURE_2D, buf.texture[filtro])
 
         translate(model,buf.translate)
         pilha.push( mat4.clone(model) )
