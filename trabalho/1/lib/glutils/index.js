@@ -1,6 +1,5 @@
 import { mat3 , mat4 , vec3 } from '../../ext/gl-matrix/index.js'
 
-let xVel = 0
 let yVel = 0
 let filtro = 0
 
@@ -163,7 +162,11 @@ const translate = (model,trans) => {
     mat4.translate( model , model , trans )
 }
 
-const rotate = (model,rot,axis) => {
+const rotateX = (model,rot,axis) => {
+    mat4.rotate( model , model , rot[0] * ( Math.PI / 180 ) , [1,0,0] )
+}
+
+const rotateY = (model,rot,axis) => {
     mat4.rotate( model , model , rot[1] * ( Math.PI / 180 ) , [0,1,0] )
 }
 
@@ -176,7 +179,7 @@ const setUnif = (gl,locations,p,m,v) => {
             locations.uCorAmbiente,
             parseFloat(1),
             parseFloat(0.5),
-            parseFloat(0.5)
+            parseFloat(1)
         )
         
         const direcaoLuz = [
@@ -192,9 +195,9 @@ const setUnif = (gl,locations,p,m,v) => {
 
          gl.uniform3f(
 			    locations.uCorDifusa,
-			    parseFloat(0.9),
-			    parseFloat(0.8),
-			    parseFloat(0.8),
+			    parseFloat(1.0),
+			    parseFloat(1.0),
+			    parseFloat(1.0),
 			  );
 
         const matrizNormal = mat3.create();
@@ -206,6 +209,8 @@ const setUnif = (gl,locations,p,m,v) => {
     gl.uniformMatrix4fv(locations.uModelMatrix,false,m)
     gl.uniformMatrix4fv(locations.uViewMatrix,false,v)
 }
+
+const pilha = []
 
 const desenharCena = (gl,locations,buffers) => {
 
@@ -221,9 +226,8 @@ const desenharCena = (gl,locations,buffers) => {
     mat4.identity(model)
     mat4.identity(view)
 
-    const pilha = []
 
-    buffers.forEach( (buf) => {
+    buffers.forEach( (buf,index) => {
     
         gl.bindVertexArray(buf.state)
 
@@ -234,14 +238,18 @@ const desenharCena = (gl,locations,buffers) => {
         translate(model,buf.translate)
         pilha.push( mat4.clone(model) )
 
-        rotate(model,buf.rot)
+        rotateX(model,buf.rot)
+
+        if( buf.rot[2] != 0) {
+            rotateY(model,buf.rot)
+        }
     
         setUnif(gl,locations,projection,model,view)
 
         if( buf.index ) { gl.drawElements( buf.tipo, buf.indexNumItems , gl.UNSIGNED_SHORT , 0 ) } 
         else { gl.drawArrays(buf.tipo,0,buf.numItems) }
 
-        model = pilha.pop()
+        if( index != 2 ) { model = pilha.pop() }
 
     })
 }
@@ -254,7 +262,6 @@ const animateBuilder = (gl,locations,buffers) => {
         if ( last != 0 ) { 
             const delta = now - last
             buffers.forEach( (buf) => {
-                buf.rot[0] +=  ( ( xVel * delta ) / 1000 ) % 360
                 buf.rot[1] +=  ( ( yVel * delta ) / 1000 ) % 360
             })
         }
@@ -293,14 +300,6 @@ const tratarTeclado = () => {
   if (teclasPressionadas[39]) {
     // Direita
     yVel += 1;
-  }
-  if (teclasPressionadas[38]) {
-    // Cima
-    xVel -= 1;
-  }
-  if (teclasPressionadas[40]) {
-    // Baixo
-    xVel += 1;
   }
 }
 
