@@ -10,7 +10,7 @@ const main = () => {
               Triangulo(
                   [1,1,0.0], //cor
                   [0.0, 3.5, -9.0], // translacao
-                  [0,0,1] 
+                  [0,45,1] 
               ),
 
               Trapezio(
@@ -22,13 +22,13 @@ const main = () => {
               Trapezio(
                   [0.8,0.0,0.0], 
                   [0.0, -2.1, 0.0], 
-                  [0,0,1] 
+                  [0,0,0] 
               ),
 
               Trapezio(
                   [0.8,0.0,0.0], 
                   [0.0, -2.1, 0.0], 
-                  [180,0,1] // rotacione 180 em x , 0 em y , e nao atualize y no teclado
+                  [180,0,0] // rotacione 180 em x , 0 em y , e nao atualize y no teclado
               ),
 
               Triangulo(
@@ -44,7 +44,7 @@ const main = () => {
               Trapezio(
                   [0.8,0.0,0.0], 
                   [-3.0, -2.1, 0.0], 
-                  [180,0,1],
+                  [180,0,0],
               ),
 
               Triangulo(
@@ -60,7 +60,7 @@ const main = () => {
               Trapezio(
                   [0.8,0.0,0.0], 
                   [-3.1, -2.1, 0.0], 
-                  [0,0,1] 
+                  [0,0,0] 
               ),
 
               Triangulo(
@@ -87,7 +87,7 @@ const main = () => {
 
               CuboTextura(
                   [4.35, -2.0, 0.0], // translacao
-                  [0,0,1], // atualize y no teclado
+                  [0,0,0], // atualize y no teclado
                   [0,0,0], // rotation step
                   './assets/caixa.gif', // texture src
               ),

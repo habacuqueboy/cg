@@ -249,7 +249,7 @@ const desenharCena = (gl,locations,buffers) => {
         if( buf.index ) { gl.drawElements( buf.tipo, buf.indexNumItems , gl.UNSIGNED_SHORT , 0 ) } 
         else { gl.drawArrays(buf.tipo,0,buf.numItems) }
 
-        if( index != 2 ) { model = pilha.pop() }
+        if( index != 1 ) { model = pilha.pop() }
 
     })
 }
