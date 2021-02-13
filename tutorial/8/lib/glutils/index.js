@@ -186,6 +186,13 @@ const setUnif = (gl,locations,p,m,v) => {
         vec3.scale(direcaoNormalizada, -1);
         gl.uniform3fv(locations.uDirecaoLuz, direcaoNormalizada);
 
+         gl.uniform3f(
+			    locations.uCorDifusa,
+			    parseFloat(document.getElementById("dr").value),
+			    parseFloat(document.getElementById("dg").value),
+			    parseFloat(document.getElementById("db").value)
+			  );
+
         const matrizNormal = mat3.create();
         mat3.normalFromMat4(m, matrizNormal);
         mat3.transpose(matrizNormal, matrizNormal);
